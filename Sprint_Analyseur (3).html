@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analyseur Sprint 50m — EPS</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Mulish:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0a0a0f; --ink2:#2e2e3a; --muted:#7a7a90;
+  --line:#e4e4ee; --bg:#f7f6f3; --white:#ffffff; --paper:#faf9f7;
+  --sprint:#c8102e; --sprint2:#ff3355;
+  --p1:#e65100; --p1lt:#fff3e0; --p1bd:#ffcc80;
+  --p2:#1565c0; --p2lt:#e3f2fd; --p2bd:#90caf9;
+  --excel:#1b7a3e; --bon:#2e7d32; --moyen:#f57f17;
+  --passable:#e65100; --faible:#c62828;
+  --font-d:'Barlow Condensed',sans-serif;
+  --font-b:'Mulish',sans-serif;
+  --font-m:'Fira Code',monospace;
+  --r:12px; --r2:20px;
+  --sh:0 1px 8px rgba(0,0,0,.07);
+  --sh2:0 6px 28px rgba(0,0,0,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-b);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* TOPBAR */
+.topbar{background:var(--ink);padding:0 24px}
+.topbar-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:36px}
+.topbar span{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.05em;font-family:var(--font-m)}
+.topbar strong{color:rgba(255,255,255,.8)}
+
+/* HEADER */
+.site-header{background:var(--white);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:60;box-shadow:var(--sh)}
+.header-inner{max-width:1240px;margin:0 auto;padding:0 24px;display:flex;align-items:center;height:60px;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-mark{width:34px;height:34px;background:var(--sprint);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-d);font-size:18px;font-weight:900;color:#fff}
+.logo-text{font-family:var(--font-d);font-size:22px;font-weight:900;letter-spacing:.06em;color:var(--ink)}
+.logo-text span{color:var(--sprint)}
+.phase-pills{display:flex;gap:6px;margin-left:16px}
+.ppill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:var(--font-m);letter-spacing:.03em}
+.ppill.p1{background:var(--p1lt);color:var(--p1);border:1px solid var(--p1bd)}
+.ppill.p2{background:var(--p2lt);color:var(--p2);border:1px solid var(--p2bd)}
+.hactions{margin-left:auto;display:flex;gap:8px}
+.hbtn{padding:7px 16px;border-radius:8px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.15s}
+.hbtn.ghost{background:transparent;color:var(--muted)}.hbtn.ghost:hover{background:var(--bg);color:var(--ink)}
+.hbtn.solid{background:var(--sprint);color:#fff}.hbtn.solid:hover{background:#a80d26}
+
+/* HERO */
+.hero{background:var(--ink);position:relative;overflow:hidden}
+.hero::before{content:'50';position:absolute;right:-40px;top:-40px;font-family:var(--font-d);font-size:400px;font-weight:900;color:rgba(255,255,255,.025);line-height:1;pointer-events:none}
+.hero-inner{max-width:1240px;margin:0 auto;padding:40px 24px;display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:center;position:relative;z-index:1}
+.hero-ey{font-family:var(--font-m);font-size:11px;color:var(--sprint2);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.hero-ey::before{content:'';width:20px;height:2px;background:var(--sprint2)}
+.hero h1{font-family:var(--font-d);font-size:clamp(38px,5.5vw,68px);font-weight:900;line-height:.9;letter-spacing:.04em;color:#fff;margin-bottom:12px}
+.hero h1 em{color:var(--sprint2);font-style:normal}
+.hero-sub{font-size:14px;color:rgba(255,255,255,.5);line-height:1.7;max-width:460px;margin-bottom:18px}
+.hero-badges{display:flex;gap:10px;flex-wrap:wrap}
+.hbadge{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;font-family:var(--font-m)}
+.hbadge.p1{background:rgba(230,81,0,.2);color:#ffab40;border:1px solid rgba(230,81,0,.35)}
+.hbadge.p2{background:rgba(21,101,192,.2);color:#64b5f6;border:1px solid rgba(21,101,192,.35)}
+.hero-kpis{display:flex;flex-direction:column;gap:10px}
+.hkpi{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 20px;text-align:center}
+.hkpi-val{font-family:var(--font-d);font-size:30px;font-weight:800;color:var(--sprint2);line-height:1}
+.hkpi-lbl{font-size:10px;color:rgba(255,255,255,.38);margin-top:2px;text-transform:uppercase;letter-spacing:.07em;font-family:var(--font-m)}
+.hkpi-sep{height:1px;background:rgba(255,255,255,.07)}
+
+/* PAGE */
+.page{max-width:1240px;margin:0 auto;padding:0 24px 80px}
+
+/* STEP RAIL */
+.rail{display:flex;align-items:center;padding:26px 0 22px}
+.si{display:flex;align-items:center;gap:9px;padding:8px 16px;border-radius:50px;cursor:pointer;transition:.15s;flex-shrink:0}
+.si.active{background:var(--ink)}.si.done{background:#f0faf4}
+.sn{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-m);font-size:11px;background:var(--line);color:var(--muted);flex-shrink:0}
+.si.active .sn{background:var(--sprint);color:#fff}.si.done .sn{background:var(--excel);color:#fff}
+.sl{font-size:13px;font-weight:700;color:var(--muted)}
+.si.active .sl{color:#fff}.si.done .sl{color:var(--excel)}
+.sc{flex:1;height:1px;background:var(--line);margin:0 4px}
+
+/* PANELS */
+.panel{display:none}
+.panel.active{display:block;animation:up .28s ease both}
+@keyframes up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+/* CARD */
+.card{background:var(--white);border:1.5px solid var(--line);border-radius:var(--r2);box-shadow:var(--sh);overflow:hidden;margin-bottom:20px}
+.ch{padding:14px 22px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
+.ct{font-family:var(--font-d);font-size:17px;font-weight:700;letter-spacing:.05em}
+.cb{padding:20px 22px}
+
+/* FORM */
+.frow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.field input,.field select{background:var(--paper);border:1.5px solid var(--line);border-radius:8px;color:var(--ink);padding:8px 11px;font-family:var(--font-b);font-size:14px;transition:.15s;outline:none}
+.field input:focus,.field select:focus{border-color:var(--sprint);background:var(--white);box-shadow:0 0 0 3px rgba(200,16,46,.09)}
+
+/* TABS */
+.itabs{display:flex;border:1.5px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:16px}
+.itab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);background:var(--paper);transition:.15s;border-right:1px solid var(--line)}
+.itab:last-child{border-right:none}
+.itab.active{background:var(--ink);color:#fff}
+.itab:hover:not(.active){background:var(--white);color:var(--ink)}
+
+/* TABLE INPUT */
+.tscroll{overflow-x:auto;border-radius:10px;border:1.5px solid var(--line)}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--bg)}
+th{padding:9px 6px;font-family:var(--font-m);font-size:10px;color:var(--muted);text-align:center;white-space:nowrap;border-bottom:1.5px solid var(--line);position:sticky;top:0;background:var(--bg)}
+th.l{text-align:left;padding-left:12px}
+th.phase{border-bottom:3px solid}
+th.phase1{border-bottom-color:var(--p1);background:#fff8f4}
+th.phase2{border-bottom-color:var(--p2);background:#f4f8ff}
+td{border-bottom:1px solid var(--line);text-align:center;padding:6px 4px;font-size:12.5px}
+td.l{text-align:left;padding-left:10px}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#fff8f8}
+.ti{width:62px;padding:5px 3px;text-align:center;border:1.5px solid transparent;border-radius:6px;font-family:var(--font-m);font-size:12.5px;background:transparent;color:var(--ink);outline:none;transition:.12s}
+.ti:focus{border-color:var(--sprint);background:var(--white)}
+.ti.p1-inp:focus{border-color:var(--p1)}
+.ti.p2-inp:focus{border-color:var(--p2)}
+.ni{border:1.5px solid transparent;border-radius:6px;font-family:var(--font-b);font-size:12.5px;padding:4px 7px;background:transparent;color:var(--ink);outline:none;transition:.12s;width:100px}
+.ni:focus{border-color:var(--line);background:var(--white)}
+.sx-sel{border:1.5px solid transparent;border-radius:6px;font-size:12px;padding:4px 5px;background:transparent;color:var(--ink);outline:none;cursor:pointer;font-family:var(--font-b)}
+.sx-sel:focus{border-color:var(--line);background:var(--white)}
+/* Phase column groups */
+.p1-col{background:rgba(230,81,0,.03)}
+.p2-col{background:rgba(21,101,192,.03)}
+
+/* PASTE */
+.paste-box{width:100%;background:var(--paper);border:1.5px solid var(--line);border-radius:var(--r);padding:14px;color:var(--ink);font-family:var(--font-m);font-size:12px;line-height:1.75;resize:vertical;min-height:160px;outline:none;transition:.15s}
+.paste-box:focus{border-color:var(--sprint);background:var(--white)}
+.hint{font-size:12px;color:var(--muted);margin-top:8px;display:flex;gap:6px}
+.drop-zone{border:2px dashed var(--line);border-radius:var(--r);padding:36px;text-align:center;cursor:pointer;transition:.2s;background:var(--paper)}
+.drop-zone:hover{border-color:var(--sprint);background:#fff8f8}
+.drop-icon{font-size:30px;margin-bottom:7px}
+#file-inp{display:none}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;border-radius:8px;font-family:var(--font-b);font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.15s;white-space:nowrap}
+.btn-p{background:var(--sprint);color:#fff}.btn-p:hover{background:#a80d26;box-shadow:0 4px 14px rgba(200,16,46,.28)}
+.btn-s{background:var(--white);color:var(--ink);border:1.5px solid var(--line)}.btn-s:hover{border-color:var(--sprint);color:var(--sprint)}
+.btn-g{background:transparent;color:var(--muted);padding:7px 12px}.btn-g:hover{color:var(--sprint)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-cta{padding:11px 28px;font-size:15px;border-radius:var(--r)}
+.btn-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* STATS BANNER */
+.sbanner{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+.sbox{background:var(--white);border:1.5px solid var(--line);border-radius:var(--r2);padding:16px 14px;box-shadow:var(--sh);text-align:center;position:relative;overflow:hidden}
+.sbox::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
+.sbox.r::after{background:var(--sprint)}.sbox.o::after{background:var(--p1)}
+.sbox.b::after{background:var(--p2)}.sbox.g::after{background:var(--excel)}
+.sbox.k::after{background:var(--ink2)}
+.sval{font-family:var(--font-d);font-size:28px;font-weight:800;line-height:1;color:var(--ink)}
+.slbl{font-size:11px;color:var(--muted);margin-top:3px;font-weight:600}
+
+/* PHASE PANELS SIDE BY SIDE */
+.phase-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.pcard{background:var(--white);border:1.5px solid var(--line);border-radius:var(--r2);padding:20px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.pcard::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+.pcard.p1::before{background:linear-gradient(90deg,var(--p1),#ff8f00)}
+.pcard.p2::before{background:linear-gradient(90deg,var(--p2),#1976d2)}
+.plabel{font-family:var(--font-m);font-size:10px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.plabel.p1{color:var(--p1)}.plabel.p2{color:var(--p2)}
+.plabel::before{content:'';width:14px;height:2px}
+.plabel.p1::before{background:var(--p1)}.plabel.p2::before{background:var(--p2)}
+.pmetrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.pmet{border-radius:8px;padding:10px 8px;text-align:center}
+.pmet.p1{background:var(--p1lt)}.pmet.p2{background:var(--p2lt)}
+.pmet-val{font-family:var(--font-d);font-size:22px;font-weight:800;line-height:1}
+.pmet.p1 .pmet-val{color:var(--p1)}.pmet.p2 .pmet-val{color:var(--p2)}
+.pmet-lbl{font-size:10px;margin-top:3px;font-family:var(--font-m)}
+.pmet.p1 .pmet-lbl{color:var(--p1)}.pmet.p2 .pmet-lbl{color:var(--p2)}
+
+/* BAR CHART */
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:20px}
+.ccard{background:var(--white);border:1.5px solid var(--line);border-radius:var(--r2);padding:20px;box-shadow:var(--sh)}
+.clbl{font-family:var(--font-m);font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+.bar-row{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.bar-nm{font-size:11.5px;color:var(--ink2);width:60px;flex-shrink:0;font-family:var(--font-m);font-weight:500}
+.bar-nm.wide{width:120px}
+.bar-track{flex:1;background:var(--bg);border-radius:4px;height:20px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;transition:width .55s cubic-bezier(.4,0,.2,1)}
+.bar-fill span{font-size:10.5px;font-weight:700;color:#fff;font-family:var(--font-m)}
+.bar-val{font-family:var(--font-m);font-size:11px;color:var(--muted);width:34px;text-align:right}
+
+/* LEVEL PILL */
+.lv{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--font-m);color:#fff;white-space:nowrap}
+.lv-ex{background:#1b7a3e}.lv-bo{background:#2e7d32}.lv-mo{background:#f57f17}
+.lv-pa{background:#e65100}.lv-fa{background:#c62828}
+
+/* SECTION LABEL */
+.slabel{display:flex;align-items:center;gap:12px;font-family:var(--font-m);font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;margin-top:26px}
+.slabel::after{content:'';flex:1;height:1px;background:var(--line)}
+
+/* RESULTS TABLE */
+.rt th{font-size:10px}
+.rt td{font-size:12px;padding:8px 5px}
+.rt tbody tr{cursor:pointer}
+.sc-cell{display:flex;align-items:center;gap:5px}
+.sc-bar{height:4px;border-radius:2px;flex-shrink:0}
+.rk1{color:#c9a227;font-weight:700}.rk2{color:#9ea3a8;font-weight:700}.rk3{color:#b87333;font-weight:700}
+
+/* RECOMMENDATIONS SECTION */
+.recs-section{margin-top:24px}
+.rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.rec-card{background:var(--white);border:1.5px solid var(--line);border-radius:var(--r2);padding:20px;box-shadow:var(--sh);border-left:5px solid var(--sprint)}
+.rec-card.p1{border-left-color:var(--p1)}.rec-card.p2{border-left-color:var(--p2)}
+.rec-card.global{border-left-color:var(--excel)}
+.rec-title{font-family:var(--font-d);font-size:15px;font-weight:700;letter-spacing:.04em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.rec-list{display:flex;flex-direction:column;gap:6px}
+.rec-item{font-size:13px;line-height:1.55;padding-left:16px;position:relative;color:var(--ink2)}
+.rec-item::before{content:'→';position:absolute;left:0;color:var(--muted);font-weight:700}
+
+/* Group recs */
+.group-level-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.glcard{background:var(--white);border:1.5px solid var(--line);border-radius:var(--r2);padding:18px;box-shadow:var(--sh)}
+.glcard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.glcard-title{font-family:var(--font-d);font-size:14px;font-weight:700;letter-spacing:.04em}
+.members-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.member-tag{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:3px 8px;font-size:11.5px;color:var(--ink2)}
+.ex-recs{font-size:12px;color:var(--ink2);line-height:1.6;border-top:1px solid var(--line);padding-top:8px;margin-top:6px}
+
+/* EXPORT */
+.exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px}
+.exp-card{background:var(--white);border:1.5px solid var(--line);border-radius:var(--r2);padding:24px 18px;text-align:center;cursor:pointer;transition:.18s;box-shadow:var(--sh)}
+.exp-card:hover{border-color:var(--sprint);transform:translateY(-2px);box-shadow:var(--sh2)}
+.exp-icon{font-size:28px;margin-bottom:8px}
+.exp-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.exp-sub{font-size:11.5px;color:var(--muted)}
+
+/* MODAL */
+.moverlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,10,15,.5);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px}
+.moverlay.open{display:flex}
+.mbox{background:var(--white);border-radius:var(--r2);width:100%;max-width:620px;max-height:88vh;overflow-y:auto;box-shadow:var(--sh2);animation:up .22s ease both;position:relative;border:1.5px solid var(--line)}
+.mstripe{height:4px;width:100%;position:sticky;top:0;z-index:2}
+.mbody{padding:24px}
+.mclose{position:sticky;top:12px;float:right;z-index:3;background:var(--bg);border:none;border-radius:8px;padding:5px 12px;font-size:18px;cursor:pointer;color:var(--muted);transition:.15s;line-height:1;margin-bottom:-36px}
+.mclose:hover{background:var(--line);color:var(--ink)}
+
+/* Phase compare in modal */
+.mphases{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.mphase{border-radius:10px;padding:14px;position:relative}
+.mphase.p1{background:var(--p1lt);border:1.5px solid var(--p1bd)}
+.mphase.p2{background:var(--p2lt);border:1.5px solid var(--p2bd)}
+.mph-label{font-family:var(--font-m);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:600}
+.mph-label.p1{color:var(--p1)}.mph-label.p2{color:var(--p2)}
+.mph-time{font-family:var(--font-d);font-size:26px;font-weight:800;line-height:1}
+.mph-time.p1{color:var(--p1)}.mph-time.p2{color:var(--p2)}
+.mph-metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.mph-met{background:rgba(255,255,255,.7);border-radius:6px;padding:7px;text-align:center}
+.mph-met-val{font-family:var(--font-d);font-size:16px;font-weight:800;line-height:1}
+.mph-met-lbl{font-size:9px;font-family:var(--font-m);color:var(--muted);margin-top:2px}
+.rec-block{background:var(--bg);border-radius:10px;padding:14px;border-left:4px solid var(--sprint);margin-top:12px}
+.rec-block-title{font-family:var(--font-m);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px}
+.rec-point{font-size:12.5px;color:var(--ink2);line-height:1.6;padding-left:14px;position:relative;margin-bottom:4px}
+.rec-point::before{content:'▸';position:absolute;left:0;color:var(--sprint)}
+
+/* DIAGNOSTIC ROW - affiché sous chaque athlète dans le tableau */
+.diag-row td{padding:0 !important;border-bottom:2px solid var(--line) !important;}
+.diag-row:hover td{background:transparent !important;}
+.diag-inner{padding:8px 14px 10px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;border-left:4px solid transparent;margin:0;font-size:12px;line-height:1.5}
+.diag-inner.ex{border-left-color:#1b7a3e;background:linear-gradient(90deg,#f0faf4,transparent)}
+.diag-inner.bo{border-left-color:#2e7d32;background:linear-gradient(90deg,#f4faf5,transparent)}
+.diag-inner.mo{border-left-color:#f57f17;background:linear-gradient(90deg,#fffbf0,transparent)}
+.diag-inner.pa{border-left-color:#e65100;background:linear-gradient(90deg,#fff8f4,transparent)}
+.diag-inner.fa{border-left-color:#c62828;background:linear-gradient(90deg,#fff5f5,transparent)}
+.diag-conclusion{font-weight:700;color:var(--ink2);font-size:12px;flex-shrink:0;white-space:nowrap;align-self:center;padding-right:10px;border-right:1px solid var(--line);margin-right:4px}
+.diag-tags{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.dtag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.dtag.prob{background:#fff0f0;color:#c62828;border:1px solid #fca5a5}
+.dtag.good{background:#f0faf4;color:#1b7a3e;border:1px solid #86efac}
+.dtag.prio{background:#fff7ed;color:#c2410c;border:1px solid #fdba74;font-weight:700}
+
+/* COMMENT INPUT */
+.ci{border:1.5px solid transparent;border-radius:6px;font-family:var(--font-b);font-size:12px;padding:4px 7px;background:transparent;color:var(--ink);outline:none;transition:.12s;width:160px;resize:none;height:32px;line-height:1.4;vertical-align:middle}
+.ci:focus{border-color:#f59e0b;background:#fffbeb}
+.ci:not(:placeholder-shown){border-color:#fde68a;background:#fffdf0}
+.comment-badge{display:inline-flex;align-items:center;gap:4px;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:3px 8px;font-size:11px;color:#92400e;max-width:200px;cursor:pointer}
+.comment-badge:hover{background:#fef3c7}
+
+/* MODAL COMMENT */
+.mcomment-block{background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:14px;margin-top:12px}
+.mcomment-label{font-family:var(--font-m);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#92400e;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.mcomment-ta{width:100%;background:#fff;border:1.5px solid #fde68a;border-radius:8px;padding:10px 12px;font-family:var(--font-b);font-size:13px;color:var(--ink);line-height:1.6;resize:vertical;min-height:80px;outline:none;transition:.15s}
+.mcomment-ta:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.12)}
+.mcomment-save{margin-top:8px;padding:6px 16px;background:#f59e0b;color:#fff;border:none;border-radius:7px;font-family:var(--font-b);font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+.mcomment-save:hover{background:#d97706}
+.mcomment-saved{display:none;font-size:11px;color:#059669;font-family:var(--font-m);margin-left:8px}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--ink);color:#fff;padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:600;transform:translateY(60px);opacity:0;transition:.3s;z-index:999;box-shadow:var(--sh2)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* Responsive */
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr}
+  .frow{grid-template-columns:repeat(2,1fr)}
+  .sbanner{grid-template-columns:repeat(3,1fr)}
+  .phase-row,.charts-row,.rec-grid,.group-level-grid{grid-template-columns:1fr}
+  .mphases{grid-template-columns:1fr}
+  .exp-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-inner">
+  <span>EPS — <strong>Analyse Sprint 50m · Deux Phases</strong></span>
+  <span id="live-date"></span>
+</div></div>
+
+<header class="site-header"><div class="header-inner">
+  <a class="logo" href="#"><div class="logo-mark">50</div><div class="logo-text">SPRINT <span>ANALYSE</span></div></a>
+  <div class="phase-pills">
+    <span class="ppill p1">🚀 Phase 1 · 0–25m · Accélération</span>
+    <span class="ppill p2">⚡ Phase 2 · 25–50m · Vitesse max</span>
+  </div>
+  <div class="hactions">
+    <button class="hbtn ghost" onclick="resetAll()">🔄 Réinitialiser</button>
+    <button class="hbtn solid" onclick="analyzeAll()">Analyser →</button>
+  </div>
+</div></header>
+
+<div class="hero"><div class="hero-inner">
+  <div>
+    <div class="hero-ey">Analyse complète par phases — Normes officielles</div>
+    <h1>SPRINT <em>50M</em><br>ANALYSE<br>BIPHASIQUE</h1>
+    <p class="hero-sub">Saisissez pour chaque athlète : temps, fréquence de foulée et amplitude par phase. L'application calcule les indicateurs par phase, compare aux normes et génère des recommandations personnalisées.</p>
+    <div class="hero-badges">
+      <div class="hbadge p1">0–25m · Fréq. · Ampli. · V. accél.</div>
+      <div class="hbadge p2">25–50m · Fréq. · Ampli. · V. max.</div>
+    </div>
+  </div>
+  <div class="hero-kpis">
+    <div class="hkpi"><div class="hkpi-val" id="hs-total">—</div><div class="hkpi-lbl">Athlètes</div></div>
+    <div class="hkpi-sep"></div>
+    <div class="hkpi"><div class="hkpi-val" id="hs-best">—</div><div class="hkpi-lbl">Meilleur</div></div>
+    <div class="hkpi-sep"></div>
+    <div class="hkpi"><div class="hkpi-val" id="hs-exc">—</div><div class="hkpi-lbl">Excellent</div></div>
+  </div>
+</div></div>
+
+<div class="page">
+<div class="rail">
+  <div class="si active" id="stab-1" onclick="goStep(1)"><div class="sn" id="sn1">1</div><div class="sl">Saisie</div></div>
+  <div class="sc"></div>
+  <div class="si" id="stab-2" onclick="goStep(2)"><div class="sn" id="sn2">2</div><div class="sl">Résultats</div></div>
+  <div class="sc"></div>
+  <div class="si" id="stab-3" onclick="goStep(3)"><div class="sn" id="sn3">3</div><div class="sl">Recommandations</div></div>
+  <div class="sc"></div>
+  <div class="si" id="stab-4" onclick="goStep(4)"><div class="sn" id="sn4">4</div><div class="sl">Export</div></div>
+</div>
+
+<!-- ═══ PANEL 1 : SAISIE ═══ -->
+<div class="panel active" id="panel-1">
+  <div class="card">
+    <div class="ch"><span class="ct">Session</span></div>
+    <div class="cb">
+      <div class="frow">
+        <div class="field"><label>Classe / Groupe</label><input type="text" id="classe-name" placeholder="ex : 3ème A"></div>
+        <div class="field"><label>Date</label><input type="date" id="test-date"></div>
+        <div class="field"><label>Catégorie d'âge</label>
+          <select id="age-cat">
+            <option value="14">14 ans</option><option value="15">15 ans</option>
+            <option value="16">16 ans</option><option value="17">17 ans</option>
+            <option value="18" selected>18+ ans (étudiant)</option>
+          </select>
+        </div>
+        <div class="field"><label>Dist. Phase 1 (m)</label><input type="number" id="dist-p1" value="25" min="10" max="30"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">
+      <span class="ct">Données par athlète</span>
+      <span style="font-size:11px;color:var(--muted)">Fréquence en pas/s · Amplitude en m · Temps en s</span>
+    </div>
+    <div class="cb">
+      <div class="itabs">
+        <div class="itab active" onclick="switchTab('manual')">✏️ Saisie manuelle</div>
+        <div class="itab" onclick="switchTab('paste')">📋 Coller depuis Excel</div>
+        <div class="itab" onclick="switchTab('import')">📂 Fichier CSV</div>
+      </div>
+
+      <div id="tab-manual">
+        <div class="tscroll" style="max-height:400px;overflow-y:auto;margin-bottom:14px">
+          <table>
+            <thead>
+              <tr>
+                <th class="l" rowspan="2">#</th>
+                <th class="l" rowspan="2">Nom</th>
+                <th rowspan="2">Sexe</th>
+                <th rowspan="2">Taille<br>(cm)</th>
+                <th colspan="3" style="background:#fff8f4;color:var(--p1);border-bottom:2px solid var(--p1)">🚀 PHASE 1 · 0–25m</th>
+                <th colspan="3" style="background:#f4f8ff;color:var(--p2);border-bottom:2px solid var(--p2)">⚡ PHASE 2 · 25–50m</th>
+                <th rowspan="2" style="min-width:170px">Commentaire<br><span style="font-size:9px;font-weight:400;color:var(--muted)">observations libres</span></th>
+                <th rowspan="2"></th>
+              </tr>
+              <tr>
+                <th class="phase1">T 0–25m (s)</th>
+                <th class="phase1">Fréq P1<br>(pas/s)</th>
+                <th class="phase1">Ampli P1<br>(m)</th>
+                <th class="phase2">T 25–50m (s)</th>
+                <th class="phase2">Fréq P2<br>(pas/s)</th>
+                <th class="phase2">Ampli P2<br>(m)</th>
+              </tr>
+            </thead>
+            <tbody id="athlete-rows"></tbody>
+          </table>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-s btn-sm" onclick="addRow()">+ Athlète</button>
+          <button class="btn btn-s btn-sm" onclick="addRows(5)">+ 5 lignes</button>
+        </div>
+      </div>
+
+      <div id="tab-paste" style="display:none">
+        <textarea class="paste-box" id="paste-area"
+          placeholder="Collez depuis Excel / Google Sheets…
+Colonnes attendues (ordre) :
+Nom  Sexe(M/F)  Taille(cm)  T_P1(s)  Freq_P1(pas/s)  Ampli_P1(m)  T_P2(s)  Freq_P2(pas/s)  Ampli_P2(m)
+
+Exemple (valeurs séparées par tabulation) :
+Ahmed	M	175	3.45	4.10	1.72	3.67	4.45	2.05
+Fatima	F	162	3.98	3.85	1.58	4.12	4.20	1.88
+Mohamed	M	180	3.20	4.30	1.85	3.42	4.62	2.18
+
+Note : Seuls Nom, T_P1 et T_P2 sont obligatoires. Les autres colonnes sont optionnelles."></textarea>
+        <p class="hint">ⓘ Séparateur : tabulation ou espace. Sexe M/F. Fréquence en pas/seconde. Amplitude en mètres.</p>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-p" onclick="parsePaste()">⚡ Importer ces données</button>
+        </div>
+      </div>
+
+      <div id="tab-import" style="display:none">
+        <div class="drop-zone" onclick="document.getElementById('file-inp').click()">
+          <div class="drop-icon">📂</div>
+          <div style="font-size:14px;font-weight:700">Cliquer pour choisir un fichier CSV</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">Colonnes : Nom, Sexe, Taille, T_P1, Freq_P1, Ampli_P1, T_P2, Freq_P2, Ampli_P2</div>
+        </div>
+        <input type="file" id="file-inp" accept=".csv,.txt" onchange="importFile(event)">
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:flex-end">
+    <button class="btn btn-p btn-cta" onclick="analyzeAll()">Lancer l'analyse →</button>
+  </div>
+</div>
+
+<!-- ═══ PANEL 2 : RÉSULTATS ═══ -->
+<div class="panel" id="panel-2">
+  <div class="sbanner">
+    <div class="sbox r"><div class="sval" id="s-total">—</div><div class="slbl">Athlètes</div></div>
+    <div class="sbox o"><div class="sval" id="s-best">—</div><div class="slbl">Meilleur temps</div></div>
+    <div class="sbox b"><div class="sval" id="s-tmoy">—</div><div class="slbl">Temps moyen</div></div>
+    <div class="sbox g"><div class="sval" id="s-exc">—</div><div class="slbl">Niveau Excellent</div></div>
+    <div class="sbox k"><div class="sval" id="s-delta">—</div><div class="slbl">Gain moy. P1→P2</div></div>
+  </div>
+
+  <!-- PHASE CARDS -->
+  <div class="phase-row">
+    <div class="pcard p1">
+      <div class="plabel p1">Phase 1 — Accélération (0–25m)</div>
+      <div class="pmetrics" id="pm1">
+        <div class="pmet p1"><div class="pmet-val">—</div><div class="pmet-lbl">V moy (m/s)</div></div>
+        <div class="pmet p1"><div class="pmet-val">—</div><div class="pmet-lbl">Fréq moy (pas/s)</div></div>
+        <div class="pmet p1"><div class="pmet-val">—</div><div class="pmet-lbl">Ampli moy (m)</div></div>
+      </div>
+      <div class="clbl" style="margin-bottom:10px">Distribution des niveaux</div>
+      <div id="chart-p1"></div>
+    </div>
+    <div class="pcard p2">
+      <div class="plabel p2">Phase 2 — Vitesse maximale (25–50m)</div>
+      <div class="pmetrics" id="pm2">
+        <div class="pmet p2"><div class="pmet-val">—</div><div class="pmet-lbl">V moy (m/s)</div></div>
+        <div class="pmet p2"><div class="pmet-val">—</div><div class="pmet-lbl">Fréq moy (pas/s)</div></div>
+        <div class="pmet p2"><div class="pmet-val">—</div><div class="pmet-lbl">Ampli moy (m)</div></div>
+      </div>
+      <div class="clbl" style="margin-bottom:10px">Distribution des niveaux</div>
+      <div id="chart-p2"></div>
+    </div>
+  </div>
+
+  <!-- EXTRA CHARTS -->
+  <div class="charts-row">
+    <div class="ccard">
+      <div class="clbl">Niveau global 50m complet (par âge/sexe)</div>
+      <div id="chart-global"></div>
+    </div>
+    <div class="ccard">
+      <div class="clbl">Gain de vitesse Phase 1 → Phase 2 (ΔV m/s) — Top 8</div>
+      <div id="chart-delta"></div>
+    </div>
+  </div>
+
+  <div class="slabel">Classement individuel complet <span style="font-size:12px;margin-left:auto;color:var(--sprint);cursor:pointer;font-family:var(--font-b);text-transform:none;letter-spacing:0" onclick="sortResults()">⇅ Trier</span></div>
+  <div class="card">
+    <div class="tscroll" style="max-height:500px;overflow-y:auto">
+      <table class="rt">
+        <thead>
+          <tr>
+            <th rowspan="2">Rang</th>
+            <th class="l" rowspan="2">Nom</th>
+            <th rowspan="2">Sexe</th>
+            <th colspan="4" style="background:#fff8f4;color:var(--p1);border-bottom:2px solid var(--p1)">Phase 1 · 0–25m</th>
+            <th colspan="4" style="background:#f4f8ff;color:var(--p2);border-bottom:2px solid var(--p2)">Phase 2 · 25–50m</th>
+            <th rowspan="2">T 50m</th>
+            <th rowspan="2">ΔV</th>
+            <th rowspan="2">Niveau<br>Global</th>
+          </tr>
+          <tr>
+            <th class="phase1">T(s)</th><th class="phase1">V(m/s)</th><th class="phase1">Fréq</th><th class="phase1">Ampli</th>
+            <th class="phase2">T(s)</th><th class="phase2">V(m/s)</th><th class="phase2">Fréq</th><th class="phase2">Ampli</th>
+          </tr>
+        </thead>
+        <tbody id="results-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn btn-s" onclick="goStep(1)">← Modifier</button>
+    <button class="btn btn-p btn-cta" onclick="goStep(3)">Recommandations →</button>
+  </div>
+</div>
+
+<!-- ═══ PANEL 3 : RECOMMANDATIONS ═══ -->
+<div class="panel" id="panel-3">
+  <div class="slabel">Recommandations générales par phase</div>
+  <div class="rec-grid" id="rec-general"></div>
+
+  <div class="slabel">Groupes par niveau — Recommandations personnalisées</div>
+  <div class="group-level-grid" id="rec-groups"></div>
+
+  <div class="btn-row" style="margin-top:16px">
+    <button class="btn btn-s" onclick="goStep(2)">← Résultats</button>
+    <button class="btn btn-p btn-cta" onclick="goStep(4)">Exporter →</button>
+  </div>
+</div>
+
+<!-- ═══ PANEL 4 : EXPORT ═══ -->
+<div class="panel" id="panel-4">
+  <div class="slabel">Téléchargement</div>
+  <div class="exp-grid">
+    <div class="exp-card" onclick="exportCSV()"><div class="exp-icon">📊</div><div class="exp-title">Export CSV complet</div><div class="exp-sub">Toutes les métriques par phase</div></div>
+    <div class="exp-card" onclick="printResults()"><div class="exp-icon">🖨️</div><div class="exp-title">Imprimer / PDF</div><div class="exp-sub">Rapport A4 paysage</div></div>
+    <div class="exp-card" onclick="copyTable()"><div class="exp-icon">📋</div><div class="exp-title">Copier le tableau</div><div class="exp-sub">Coller dans Excel / Sheets</div></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-s" onclick="goStep(3)">← Recommandations</button>
+    <button class="btn btn-p" onclick="resetAll()">🔄 Nouvelle session</button>
+  </div>
+</div>
+
+</div><!-- /page -->
+
+<!-- PROFILE MODAL -->
+<div class="moverlay" id="moverlay" onclick="closeMBg(event)">
+  <div class="mbox">
+    <button class="mclose" onclick="closeM()">×</button>
+    <div class="mstripe" id="mstripe"></div>
+    <div class="mbody" id="mbody"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ════ NORMES PDF ════
+const N_P1=[
+  {l:"Excellent",color:"#1b7a3e",minV:7.5,maxT:3.3},
+  {l:"Bon",      color:"#2e7d32",minV:6.5,maxT:3.8},
+  {l:"Moyen",    color:"#f57f17",minV:5.5,maxT:4.5},
+  {l:"À améliorer",color:"#c62828",minV:0,maxT:999}
+];
+const N_P2=[
+  {l:"Excellent",color:"#1b7a3e",minV:8.5,maxT:2.9},
+  {l:"Bon",      color:"#2e7d32",minV:7.5,maxT:3.3},
+  {l:"Moyen",    color:"#f57f17",minV:6.5,maxT:3.8},
+  {l:"À améliorer",color:"#c62828",minV:0,maxT:999}
+];
+const N_FREQ_P1=[
+  {l:"Excellent",min:4.5},{l:"Bon",min:4.0},{l:"Moyen",min:3.5},{l:"À améliorer",min:0}
+];
+const N_FREQ_P2=[
+  {l:"Élite",min:4.5},{l:"Excellent",min:4.3},{l:"Bon",min:3.8},{l:"Moyen",min:0}
+];
+const N_AMPLI_P1={elite:{min:1.6,max:1.9},bon:{min:1.4,max:1.7},moyen:{min:1.2,max:1.5}};
+const N_AMPLI_P2={elite:{min:2.2,max:2.5},bon:{min:1.8,max:2.1},moyen:{min:1.5,max:1.8}};
+
+const N_GLOBAL={
+  M:{14:[{l:"Excellent",max:7.57},{l:"Bon",max:7.85},{l:"Moyen",max:8.40},{l:"Passable",max:8.78},{l:"Faible",max:999}],
+     15:[{l:"Excellent",max:7.30},{l:"Bon",max:7.70},{l:"Moyen",max:8.20},{l:"Passable",max:8.60},{l:"Faible",max:999}],
+     16:[{l:"Excellent",max:8.26},{l:"Bon",max:8.89},{l:"Moyen",max:9.94},{l:"Passable",max:12.04},{l:"Faible",max:999}],
+     17:[{l:"Excellent",max:8.17},{l:"Bon",max:8.69},{l:"Moyen",max:9.44},{l:"Passable",max:10.89},{l:"Faible",max:999}],
+     18:[{l:"Excellent",max:6.80},{l:"Bon",max:7.20},{l:"Moyen",max:7.80},{l:"Passable",max:8.50},{l:"Faible",max:999}]},
+  F:{14:[{l:"Excellent",max:8.10},{l:"Bon",max:8.60},{l:"Moyen",max:9.20},{l:"Passable",max:9.80},{l:"Faible",max:999}],
+     15:[{l:"Excellent",max:8.00},{l:"Bon",max:8.50},{l:"Moyen",max:9.10},{l:"Passable",max:9.70},{l:"Faible",max:999}],
+     16:[{l:"Excellent",max:9.62},{l:"Bon",max:10.53},{l:"Moyen",max:11.49},{l:"Passable",max:12.46},{l:"Faible",max:999}],
+     17:[{l:"Excellent",max:9.77},{l:"Bon",max:10.71},{l:"Moyen",max:11.78},{l:"Passable",max:12.83},{l:"Faible",max:999}],
+     18:[{l:"Excellent",max:7.80},{l:"Bon",max:8.30},{l:"Moyen",max:9.00},{l:"Passable",max:9.80},{l:"Faible",max:999}]}
+};
+
+const LV_CLR={"Excellent":"#1b7a3e","Bon":"#2e7d32","Moyen":"#f57f17","Passable":"#e65100","À améliorer":"#c62828","Faible":"#c62828","Élite":"#1b7a3e"};
+const LV_CLS={"Excellent":"lv-ex","Bon":"lv-bo","Moyen":"lv-mo","Passable":"lv-pa","À améliorer":"lv-fa","Faible":"lv-fa","Élite":"lv-ex"};
+
+// ════ RECOMMENDATIONS DATABASE ════
+const RECS={
+  p1:{
+    "Excellent":["Fractionné court 3×10m + 3×20m à 100% avec récupération complète (3 min)","Travail de départ avec starting-blocks ou 3 appuis pour affiner la réactivité","Séances de pliométrie basse : bondissements horizontaux 4×6 répétitions","Renforcement excentrique des ischio-jambiers (Nordic curl, Good morning)","Maintenir la fréquence de foulée par des exercices de montées de genoux rapides"],
+    "Bon":["Sprints 4×20m départ debout + 4×25m départ 3 appuis — récupération 4 min","Travail de poussée avec traîneaux légers (10% du poids de corps)","Pliométrie : squat jumps 3×8 + sauts horizontaux 3×6","Gammes athlétiques : talons-fesses, montées de genoux, foulées bondissantes","Renforcement : squats bulgares, fentes dynamiques 3×12"],
+    "Moyen":["Sprints progressifs 6×20m à 80-90% avec accent sur l'inclinaison du tronc","Travail de coordination : skipping A et B, foulées bondissantes lentes","Renforcement fonctionnel : squats 3×15, step-ups, hip thrust","Éducatifs d'accélération : poussées contre mur 3×10, départs en chute","Exercices de gainage dynamique pour la stabilité du tronc en course"],
+    "À améliorer":["Sprints courts répétés : 8×15m récupération marche retour — travail de base","Gammes athlétiques complètes en début de séance (15 min)","Renforcement général : squats au poids du corps, fentes, sauts en longueur","Coordination : corde à sauter 2×2 min, montées de genoux sur place","Travail de posture et d'inclinaison du tronc au départ (vidéo conseillé)"]
+  },
+  p2:{
+    "Excellent":["Sprints lancés 4×20m (prise d'élan 15m) à 100% VMA","Survitesse : course en légère descente (2-3°) 3×30m","Travail de fréquence : échelles de coordination rapides, talons-fesses explosifs","Pliométrie haute : drop jumps 3×6, sauts verticaux avec rebond immédiat","Séances à 90-95% avec focus sur le relâchement musculaire (mâchoire, épaules)"],
+    "Bon":["Sprints lancés 5×25m à 95% — récupération 5 min complète","Travail amplitude : foulées bondissantes 4×30m, montées genoux amples","Renforcement : fentes en marche avec haltères 3×12, step-ups explosifs","Fréquence : échelles de rythme bilatéral 3×20m","Relâchement : 200m à 80% avec focus décontraction haut du corps"],
+    "Moyen":["Sprints lancés 4×20m à 85-90% — travailler le maintien de la posture verticale","Exercices de coordination jambe-bras : marche athlétique accélérée 4×20m","Renforcement : nordic curls 3×6, calf raises, hip thrust 3×15","Étirements dynamiques des fléchisseurs de hanche avant chaque séance","Travail de fréquence avec métronome : 3.8 puis 4.0 puis 4.2 pas/s progressivement"],
+    "À améliorer":["Travail d'endurance de vitesse : 3×50m à 75-80% — base cardiovasculaire","Éducatifs de vitesse maximale : skipping rapide 6×15m","Renforcement des ischio-jambiers et des fessiers : priorité absolue","Stretching actif des hip flexors et quadriceps après chaque séance","Séances bi-hebdomadaires de gammes athlétiques complètes"]
+  },
+  freq:{
+    p1:{
+      "Excellent":["Fréquence optimale — maintenir avec exercices de réactivité sur échelle de coordination","Alterner séances haute fréquence (>4.5 pas/s) et récupération active"],
+      "Bon":["Travailler à 4.3 pas/s cible — sprints courts avec comptage des appuis sur 15m","Échelles de rythme bilatéral : objectif +0.2 pas/s en 4 semaines"],
+      "Moyen":["Exercices de talons-fesses rapides : 4×20m — cible 3.8 puis 4.0 pas/s","Skipping rapide sur place 3×15s — focus réactivité"],
+      "À améliorer":["Corde à sauter double appui → simple appui (progression sur 6 semaines)","Travail de coordination neurale : montées de genoux alternées rapides"]
+    },
+    p2:{
+      "Élite":["Fréquence d'élite — optimiser l'amplitude pour maximiser la vitesse","Ratio amplitude/fréquence : viser 2.2m × 4.5 pas/s"],
+      "Excellent":["Maintenir la fréquence — travailler la coordination bras-jambes à vitesse max","Sprints lancés 30m pour consolider le pattern moteur à haute fréquence"],
+      "Bon":["Cible 4.0–4.2 pas/s — talons-fesses à vitesse maximale 4×20m","Travail en survitesse légère pour briser le plafond de fréquence"],
+      "Moyen":["Fréquence insuffisante pour la phase max — priorité aux éducatifs de réactivité","Biofeedback sonore (métronome) pendant les sprints lancés : cible 4.0 pas/s"]
+    }
+  },
+  ampli:{
+    p1:{
+      "Bon":["Amplitude correcte pour la phase — maintenir et travailler la progression vers P2"],
+      "Insuffisante":["Foulées bondissantes basses et longues 4×20m","Travailler l'extension complète de la jambe d'appui — push-offs 3×10"]
+    },
+    p2:{
+      "Bon":["Bonne amplitude — travailler le retour actif du pied sous le centre de gravité"],
+      "Insuffisante":["Montées de genoux amples 4×20m — viser hauteur hanches","Foulées bondissantes longues 4×30m — extension maximale de hanche"]
+    }
+  }
+};
+
+let athletes=[], results=[], rowCount=0, sortAsc=false;
+
+// ── Init ──
+document.getElementById('live-date').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+document.getElementById('test-date').value=new Date().toISOString().split('T')[0];
+
+function goStep(n){
+  if(n>=2&&!results.length){toast('⚠ Lancez d\'abord l\'analyse');return;}
+  [1,2,3,4].forEach(i=>{
+    document.getElementById('panel-'+i).classList.toggle('active',i===n);
+    const t=document.getElementById('stab-'+i);
+    t.classList.toggle('active',i===n);
+    t.classList.toggle('done',i<n);
+  });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function switchTab(n){
+  ['manual','paste','import'].forEach(t=>document.getElementById('tab-'+t).style.display=t===n?'':'none');
+  document.querySelectorAll('.itab').forEach((el,i)=>el.classList.toggle('active',['manual','paste','import'][i]===n));
+}
+
+// ── ROWS ──
+function addRow(d=null){
+  rowCount++;const id=rowCount;
+  const tr=document.createElement('tr');tr.id='row-'+id;
+  const sxo=['M','F'].map(s=>`<option value="${s}" ${((d&&d.sexe)||'M')===s?'selected':''}>${s}</option>`).join('');
+  tr.innerHTML=`
+    <td class="l" style="font-family:var(--font-m);font-size:11px;color:var(--muted);padding-left:10px">${id}</td>
+    <td class="l"><input class="ni" type="text" value="${(d&&d.nom)||''}" placeholder="Nom…"></td>
+    <td><select class="sx-sel">${sxo}</select></td>
+    <td><input class="ti" type="number" value="${(d&&d.taille)||''}" min="120" max="220" step="1" placeholder="—"></td>
+    <td class="p1-col"><input class="ti p1-inp" type="number" value="${(d&&d.t1)||''}" min="2" max="8" step="0.01" placeholder="—"></td>
+    <td class="p1-col"><input class="ti p1-inp" type="number" value="${(d&&d.f1)||''}" min="2" max="6" step="0.01" placeholder="—"></td>
+    <td class="p1-col"><input class="ti p1-inp" type="number" value="${(d&&d.a1)||''}" min="0.5" max="2.5" step="0.01" placeholder="—"></td>
+    <td class="p2-col"><input class="ti p2-inp" type="number" value="${(d&&d.t2)||''}" min="2" max="8" step="0.01" placeholder="—"></td>
+    <td class="p2-col"><input class="ti p2-inp" type="number" value="${(d&&d.f2)||''}" min="2" max="6" step="0.01" placeholder="—"></td>
+    <td class="p2-col"><input class="ti p2-inp" type="number" value="${(d&&d.a2)||''}" min="0.5" max="3" step="0.01" placeholder="—"></td>
+    <td><textarea class="ci" placeholder="Ex : départ hésitant, manque de relâchement…">${(d&&d.commentaire)||''}</textarea></td>
+    <td><button onclick="removeRow(${id})" class="btn btn-g btn-sm" style="color:var(--sprint)">×</button></td>`;
+  document.getElementById('athlete-rows').appendChild(tr);
+}
+function addRows(n){for(let i=0;i<n;i++)addRow();}
+function removeRow(id){const el=document.getElementById('row-'+id);if(el)el.remove();}
+
+function getAthletes(){
+  return Array.from(document.querySelectorAll('#athlete-rows tr')).flatMap((tr,i)=>{
+    const inps=tr.querySelectorAll('input');
+    const sel=tr.querySelector('select');
+    if(!inps.length)return[];
+    const nom=inps[0].value.trim()||'Athlète '+(i+1);
+    const sexe=sel?sel.value:'M';
+    const vals=Array.from(inps).slice(1).map(inp=>parseFloat(inp.value));
+    const[taille,t1,f1,a1,t2,f2,a2]=vals;
+    const ta=tr.querySelector('textarea');
+    const commentaire=ta?ta.value.trim():'';
+    if(isNaN(t1)||isNaN(t2)||t1<=0||t2<=0)return[];
+    return[{nom,sexe,taille:taille||0,t1,f1:f1||0,a1:a1||0,t2,f2:f2||0,a2:a2||0,commentaire}];
+  });
+}
+
+function parsePaste(){
+  const text=document.getElementById('paste-area').value;
+  const arr=text.split('\n').map(l=>l.trim()).filter(l=>l&&!l.startsWith('Nom')).flatMap((line,i)=>{
+    const parts=line.split(/[\t,; ]+/);
+    if(parts.length<2)return[];
+    let idx=0;
+    const nom=isNaN(parts[0])?parts[idx++]:'Athlète '+(i+1);
+    const sexe=parts[idx]&&['M','F','m','f'].includes(parts[idx])?parts[idx++].toUpperCase():'M';
+    const nums=parts.slice(idx).map(p=>parseFloat(p)).filter(v=>!isNaN(v));
+    let ni=0;
+    const taille=nums[0]>50&&nums[0]<250?nums[ni++]:0;
+    const t1=nums[ni++]||0,f1=nums[ni++]||0,a1=nums[ni++]||0;
+    const t2=nums[ni++]||0,f2=nums[ni++]||0,a2=nums[ni++]||0;
+    if(!t1||!t2)return[];
+    return[{nom,sexe,taille,t1,f1,a1,t2,f2,a2}];
+  });
+  if(!arr.length){toast('⚠ Format non reconnu');return;}
+  document.getElementById('athlete-rows').innerHTML='';rowCount=0;
+  arr.forEach(a=>addRow(a));
+  switchTab('manual');toast('✅ '+arr.length+' athlètes importés');
+}
+
+function importFile(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();r.onload=ev=>{document.getElementById('paste-area').value=ev.target.result;switchTab('paste');parsePaste();};r.readAsText(file);
+}
+
+// ── CLASSIFY ──
+function classP1(t1){const v=25/t1;return N_P1.find(n=>v>n.minV)?.l||"À améliorer";}
+function classP2(t2){const v=25/t2;return N_P2.find(n=>v>n.minV)?.l||"À améliorer";}
+function classFreqP1(f){return N_FREQ_P1.find(n=>f>=n.min)?.l||"À améliorer";}
+function classFreqP2(f){return N_FREQ_P2.find(n=>f>=n.min)?.l||"Moyen";}
+function classAmpliP1(a){if(a>=1.6)return"Bon";if(a>=1.2)return"Moyen";return"Insuffisante";}
+function classAmpliP2(a){if(a>=1.8)return"Bon";if(a>=1.5)return"Moyen";return"Insuffisante";}
+function classGlobal(t50,sexe,age){
+  const s=sexe==='F'?'F':'M';const a=Math.min(parseInt(age)||18,18);const ag=a<14?14:a;
+  const norms=N_GLOBAL[s][ag]||N_GLOBAL[s][18];
+  return norms.find(n=>t50<=n.max)?.l||"Faible";
+}
+
+function analyzeOne(a,age,dp1=25){
+  const{nom,sexe,taille,t1,f1,a1,t2,f2,a2,commentaire}=a;
+  const t50=+(t1+t2).toFixed(2);
+  const v1=+(dp1/t1).toFixed(2);
+  const v2=+(dp1/t2).toFixed(2);
+  const dv=+(v2-v1).toFixed(2);
+  const dvp=+((dv/v1)*100).toFixed(1);
+  // Freq estimate if not given (V = F × A)
+  const f1e=f1||(a1?+(v1/a1).toFixed(2):0);
+  const f2e=f2||(a2?+(v2/a2).toFixed(2):0);
+  // Ampli estimate if not given
+  const a1e=a1||(f1?+(v1/f1).toFixed(2):0);
+  const a2e=a2||(f2?+(v2/f2).toFixed(2):0);
+
+  const nP1=classP1(t1);
+  const nP2=classP2(t2);
+  const nG=classGlobal(t50,sexe,age);
+  const nF1=f1e?classFreqP1(f1e):'—';
+  const nF2=f2e?classFreqP2(f2e):'—';
+  const nA1=a1e?classAmpliP1(a1e):'—';
+  const nA2=a2e?classAmpliP2(a2e):'—';
+
+  return{nom,sexe,taille,t1,t2,t50,v1,v2,dv,dvp,
+    f1:f1e,f2:f2e,a1:a1e,a2:a2e,
+    nP1,nP2,nG,nF1,nF2,nA1,nA2,
+    commentaire:commentaire||'',
+    cP1:LV_CLR[nP1]||'#888',cP2:LV_CLR[nP2]||'#888',cG:LV_CLR[nG]||'#888'};
+}
+
+// ════ DIAGNOSTIC AUTOMATIQUE ════
+// Génère un commentaire explicatif basé sur toutes les métriques de l'athlète
+function genDiagnostic(r){
+  const points=[];   // problèmes détectés (rouge)
+  const bons=[];     // points positifs (vert)
+  const prio=[];     // priorité d'amélioration
+
+  // ── Phase 1 : Accélération ──
+  if(r.nP1==='Excellent'){
+    bons.push("Excellente accélération sur 0–25m");
+  } else if(r.nP1==='Bon'){
+    bons.push("Bonne phase d'accélération");
+  } else if(r.nP1==='Moyen'){
+    points.push("Accélération insuffisante (v1="+r.v1+" m/s — cible >6,5)");
+    prio.push("Travail explosivité au départ");
+  } else {
+    points.push("Accélération très faible (v1="+r.v1+" m/s < 5,5 m/s)");
+    prio.push("Priorité : départ explosif et inclinaison du tronc");
+  }
+
+  // ── Phase 2 : Vitesse maximale ──
+  if(r.nP2==='Excellent'){
+    bons.push("Vitesse maximale excellente en fin de course");
+  } else if(r.nP2==='Bon'){
+    bons.push("Bon maintien de la vitesse en Phase 2");
+  } else if(r.nP2==='Moyen'){
+    points.push("Vitesse max insuffisante (v2="+r.v2+" m/s — cible >7,5)");
+    prio.push("Sprints lancés pour améliorer la vitesse de pointe");
+  } else {
+    points.push("Décélération précoce marquée (v2="+r.v2+" m/s < 6,5 m/s)");
+    prio.push("Priorité absolue : maintien vitesse max et relâchement");
+  }
+
+  // ── Delta V : gain entre phases ──
+  if(r.dv>=1.5){
+    bons.push("Très bon gain de vitesse P1→P2 (+"+r.dv+" m/s)");
+  } else if(r.dv>=1.0){
+    bons.push("Gain normal entre phases (+"+r.dv+" m/s)");
+  } else if(r.dv>=0.5){
+    points.push("Gain faible P1→P2 (+"+r.dv+" m/s — attendu >1,0)");
+  } else {
+    points.push("Pas de progression entre phases (+"+r.dv+" m/s) — possible fatigue ou blocage technique");
+  }
+
+  // ── Fréquence Phase 1 ──
+  if(r.f1>0){
+    if(r.f1>=4.5)      bons.push("Fréquence P1 excellente ("+r.f1+" pas/s)");
+    else if(r.f1>=4.0) bons.push("Fréquence P1 correcte ("+r.f1+" pas/s)");
+    else if(r.f1>=3.5) points.push("Fréquence P1 faible ("+r.f1+" pas/s — cible >4,0)");
+    else               {points.push("Fréquence P1 très faible ("+r.f1+" pas/s)");prio.push("Coordination neuromusculaire P1");}
+  }
+
+  // ── Fréquence Phase 2 ──
+  if(r.f2>0){
+    if(r.f2>=4.5)      bons.push("Fréquence P2 élite ("+r.f2+" pas/s)");
+    else if(r.f2>=4.3) bons.push("Fréquence P2 excellente ("+r.f2+" pas/s)");
+    else if(r.f2>=3.8) {} // normale, pas de commentaire
+    else               {points.push("Fréquence P2 insuffisante ("+r.f2+" pas/s — cible >3,8)");prio.push("Cadence : talons-fesses + échelle de rythme");}
+  }
+
+  // ── Amplitude Phase 1 ──
+  if(r.a1>0){
+    if(r.a1>=1.6)      bons.push("Amplitude P1 élite ("+r.a1+"m)");
+    else if(r.a1>=1.4) {} // correct
+    else if(r.a1>=1.2) points.push("Amplitude P1 réduite ("+r.a1+"m — attendu >1,4m)");
+    else               {points.push("Amplitude P1 très faible ("+r.a1+"m) — poussée insuffisante");prio.push("Extension complète jambe d'appui en P1");}
+  }
+
+  // ── Amplitude Phase 2 ──
+  if(r.a2>0){
+    if(r.a2>=2.2)      bons.push("Amplitude P2 élite ("+r.a2+"m)");
+    else if(r.a2>=1.8) bons.push("Amplitude P2 correcte ("+r.a2+"m)");
+    else if(r.a2>=1.5) points.push("Amplitude P2 limitée ("+r.a2+"m — attendu >1,8m)");
+    else               {points.push("Amplitude P2 très réduite ("+r.a2+"m) — montée de genou insuffisante");prio.push("Foulées bondissantes et montée de genou P2");}
+  }
+
+  // ── Cohérence fréquence/amplitude P1→P2 ──
+  if(r.f1>0&&r.f2>0){
+    const freqProgression=r.f2-r.f1;
+    if(freqProgression<0)      points.push("Baisse de fréquence entre P1 et P2 (−"+Math.abs(freqProgression.toFixed(2))+" pas/s) — fatigue ou inhibition");
+    else if(freqProgression>0.3) bons.push("Bonne progression de la fréquence P1→P2 (+"+freqProgression.toFixed(2)+" pas/s)");
+  }
+  if(r.a1>0&&r.a2>0){
+    const ampliProgression=r.a2-r.a1;
+    if(ampliProgression<0.2)   points.push("Faible gain d'amplitude P1→P2 (+"+ampliProgression.toFixed(2)+"m — attendu +0,3 à +0,6m)");
+    else if(ampliProgression>=0.4) bons.push("Bonne progression amplitude P1→P2 (+"+ampliProgression.toFixed(2)+"m)");
+  }
+
+  // ── Niveau global ──
+  const conclusionMap={
+    "Excellent":"Performance globale de haut niveau. Maintenir et affiner la technique de pointe.",
+    "Bon":"Bon niveau général. Des marges de progression existent sur les phases les plus faibles.",
+    "Moyen":"Niveau standard. Un travail ciblé par phase permettrait une progression significative.",
+    "Passable":"Niveau insuffisant. Des lacunes techniques et physiques doivent être corrigées.",
+    "Faible":"Niveau très bas. Un programme de remise à niveau complet est nécessaire."
+  };
+
+  return{
+    problemes:points,
+    positifs:bons,
+    priorites:prio,
+    conclusion:conclusionMap[r.nG]||''
+  };
+}
+
+function analyzeAll(){
+  const classe=document.getElementById('classe-name').value.trim()||'Groupe';
+  const age=parseInt(document.getElementById('age-cat').value)||18;
+  const dp1=parseFloat(document.getElementById('dist-p1').value)||25;
+  const raw=getAthletes();
+  if(!raw.length){toast('⚠ Aucune donnée valide');return;}
+  athletes=raw;
+  results=raw.map(a=>({...analyzeOne(a,age,dp1),classe}));
+  results.sort((a,b)=>a.t50-b.t50);
+  results.forEach((r,i)=>r.rang=i+1);
+  renderAll();
+  goStep(2);
+}
+
+// ── RENDER ──
+function avg(arr){return arr.length?+(arr.reduce((s,v)=>s+v,0)/arr.length).toFixed(2):0;}
+
+function renderAll(){
+  const ts=results.map(r=>r.t50);
+  const excels=results.filter(r=>r.nG==='Excellent').length;
+  const deltaMoy=avg(results.map(r=>r.dv));
+  document.getElementById('s-total').textContent=results.length;
+  document.getElementById('s-best').textContent=Math.min(...ts).toFixed(2)+'s';
+  document.getElementById('s-tmoy').textContent=avg(ts)+'s';
+  document.getElementById('s-exc').textContent=excels+'/'+results.length;
+  document.getElementById('s-delta').textContent='+'+deltaMoy+' m/s';
+  document.getElementById('hs-total').textContent=results.length;
+  document.getElementById('hs-best').textContent=Math.min(...ts).toFixed(2)+'s';
+  document.getElementById('hs-exc').textContent=excels;
+
+  // Phase metric cards
+  const v1s=results.map(r=>r.v1).filter(v=>v),v2s=results.map(r=>r.v2).filter(v=>v);
+  const f1s=results.map(r=>r.f1).filter(v=>v),f2s=results.map(r=>r.f2).filter(v=>v);
+  const a1s=results.map(r=>r.a1).filter(v=>v),a2s=results.map(r=>r.a2).filter(v=>v);
+
+  setPhaseMetrics('pm1',[avg(v1s),avg(f1s),avg(a1s)],['V moy (m/s)','Fréq moy (pas/s)','Ampli moy (m)'],'p1');
+  setPhaseMetrics('pm2',[avg(v2s),avg(f2s),avg(a2s)],['V moy (m/s)','Fréq moy (pas/s)','Ampli moy (m)'],'p2');
+
+  // Level charts
+  const lvls=["Excellent","Bon","Moyen","À améliorer"];
+  renderLvlChart('chart-p1',lvls,r=>r.nP1,LV_CLR);
+  renderLvlChart('chart-p2',lvls,r=>r.nP2,LV_CLR);
+  renderLvlChart('chart-global',["Excellent","Bon","Moyen","Passable","Faible"],r=>r.nG,LV_CLR);
+  renderDeltaChart();
+
+  // Table
+  const vmax=Math.max(...results.map(r=>r.v2),1);
+  const diagCls={'Excellent':'ex','Bon':'bo','Moyen':'mo','Passable':'pa','Faible':'fa','À améliorer':'fa'};
+  let html='';
+  results.forEach((r,i)=>{
+    const rk=i===0?'rk1':i===1?'rk2':i===2?'rk3':'';
+    const bw=Math.round(r.v2/vmax*60);
+    const diag=genDiagnostic(r);
+    const dc=diagCls[r.nG]||'mo';
+
+    // Build diagnostic tags
+    let tags='';
+    // Priorités en premier (orange foncé)
+    diag.priorites.forEach(p=>{ tags+=`<span class="dtag prio">🎯 ${p}</span>`; });
+    // Problèmes (rouge)
+    diag.problemes.forEach(p=>{ tags+=`<span class="dtag prob">⚠ ${p}</span>`; });
+    // Points positifs (vert) — max 2 pour ne pas surcharger
+    diag.positifs.slice(0,2).forEach(p=>{ tags+=`<span class="dtag good">✓ ${p}</span>`; });
+
+    const colspan=13; // total colonnes de données
+
+    html+=`
+    <tr onclick="showProfile(${i})" style="cursor:pointer">
+      <td class="${rk}" style="font-family:var(--font-m)">${r.rang}</td>
+      <td class="l" style="font-weight:700">${r.nom}</td>
+      <td style="color:var(--muted);font-family:var(--font-m)">${r.sexe}</td>
+      <td class="p1-col" style="font-family:var(--font-m)">${r.t1}</td>
+      <td class="p1-col" style="font-family:var(--font-m);color:var(--p1);font-weight:700">${r.v1}</td>
+      <td class="p1-col" style="font-family:var(--font-m)">${r.f1||'—'}</td>
+      <td class="p1-col" style="font-family:var(--font-m)">${r.a1||'—'}</td>
+      <td class="p2-col" style="font-family:var(--font-m)">${r.t2}</td>
+      <td class="p2-col">
+        <div class="sc-cell">
+          <span style="font-family:var(--font-m);color:var(--p2);font-weight:700">${r.v2}</span>
+          <div class="sc-bar" style="width:${bw}px;background:var(--p2)"></div>
+        </div>
+      </td>
+      <td class="p2-col" style="font-family:var(--font-m)">${r.f2||'—'}</td>
+      <td class="p2-col" style="font-family:var(--font-m)">${r.a2||'—'}</td>
+      <td style="font-family:var(--font-m);font-weight:700">${r.t50}</td>
+      <td style="font-family:var(--font-m);color:var(--excel);font-weight:700">+${r.dv}</td>
+      <td><span class="lv ${LV_CLS[r.nG]||''}">${r.nG}</span></td>
+    </tr>
+    <tr class="diag-row">
+      <td colspan="${colspan}">
+        <div class="diag-inner ${dc}">
+          <div class="diag-conclusion">${r.nG} — ${diag.conclusion.split('.')[0]}.</div>
+          <div class="diag-tags">${tags||'<span class="dtag good">✓ Aucun problème majeur détecté</span>'}</div>
+        </div>
+      </td>
+    </tr>`;
+  });
+  document.getElementById('results-body').innerHTML=html;
+
+  renderRecommendations();
+}
+
+function setPhaseMetrics(id,vals,lbls,cls){
+  const el=document.getElementById(id);
+  const divs=el.querySelectorAll('.pmet');
+  vals.forEach((v,i)=>{
+    if(divs[i]){
+      divs[i].querySelector('.pmet-val').textContent=v||'—';
+      divs[i].querySelector('.pmet-lbl').textContent=lbls[i];
+    }
+  });
+}
+
+function renderLvlChart(id,lvls,fn,colors){
+  const cnt={};results.forEach(r=>{const k=fn(r);cnt[k]=(cnt[k]||0)+1;});
+  const max=Math.max(...Object.values(cnt),1);
+  document.getElementById(id).innerHTML=lvls.map(k=>{
+    const n=cnt[k]||0;if(!n)return'';
+    const w=Math.round(n/max*100);
+    return`<div class="bar-row">
+      <div class="bar-nm">${k.substring(0,12)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${colors[k]||'#888'}"><span>${n}</span></div></div>
+      <div class="bar-val">${Math.round(n/results.length*100)}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderDeltaChart(){
+  const sorted=[...results].sort((a,b)=>b.dv-a.dv).slice(0,8);
+  const max=Math.max(...sorted.map(r=>r.dv),0.1);
+  document.getElementById('chart-delta').innerHTML=sorted.map(r=>{
+    const w=Math.round(r.dv/max*100);
+    const col=r.dv>=1.5?'#1b7a3e':r.dv>=1.0?'#2e7d32':r.dv>=0.5?'#f57f17':'#c62828';
+    return`<div class="bar-row">
+      <div class="bar-nm wide" style="width:90px;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.nom}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${col}"><span>+${r.dv}</span></div></div>
+      <div class="bar-val">${r.dvp}%</div>
+    </div>`;
+  }).join('');
+}
+
+function sortResults(){
+  sortAsc=!sortAsc;
+  results.sort((a,b)=>sortAsc?b.t50-a.t50:a.t50-b.t50);
+  results.forEach((r,i)=>r.rang=i+1);
+  renderAll();
+}
+
+// ── RECOMMENDATIONS ──
+function renderRecommendations(){
+  // General recs by dominant level
+  const lvls=["Excellent","Bon","Moyen","À améliorer"];
+  const domP1=lvls.find(l=>results.filter(r=>r.nP1===l).length>0)||"Moyen";
+  const domP2=lvls.find(l=>results.filter(r=>r.nP2===l).length>0)||"Moyen";
+
+  const recGenHTML=`
+    <div class="rec-card p1">
+      <div class="rec-title"><span style="font-size:18px">🚀</span> Phase 1 — Accélération (0–25m)</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Niveau dominant du groupe : <span class="lv ${LV_CLS[domP1]}">${domP1}</span></div>
+      <div class="rec-list">${(RECS.p1[domP1]||[]).map(r=>`<div class="rec-item">${r}</div>`).join('')}</div>
+    </div>
+    <div class="rec-card p2">
+      <div class="rec-title"><span style="font-size:18px">⚡</span> Phase 2 — Vitesse maximale (25–50m)</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Niveau dominant du groupe : <span class="lv ${LV_CLS[domP2]}">${domP2}</span></div>
+      <div class="rec-list">${(RECS.p2[domP2]||[]).map(r=>`<div class="rec-item">${r}</div>`).join('')}</div>
+    </div>`;
+  document.getElementById('rec-general').innerHTML=recGenHTML;
+
+  // Group by global level
+  const groupDefs=[
+    {l:"Excellent",color:"#1b7a3e",icon:"🏅"},
+    {l:"Bon",color:"#2e7d32",icon:"✅"},
+    {l:"Moyen",color:"#f57f17",icon:"📈"},
+    {l:"Passable",color:"#e65100",icon:"⚠️"},
+    {l:"Faible",color:"#c62828",icon:"🔴"}
+  ];
+  const indivRecs={
+    "Excellent":"Fractionné VMA 200m, pliométrie haute, survitesse — objectif temps compétition.",
+    "Bon":"Travailler le seuil de vitesse maximale : sprints lancés 30m × 6, récup. 5 min.",
+    "Moyen":"Priorité à l'amplitude de foulée P2 et la fréquence P1. Renforcement fonctionnel 3×/sem.",
+    "Passable":"Construire la base : endurance de vitesse, gammes athlétiques, renforcement général.",
+    "Faible":"Programme de base 8 semaines : marche athlétique, éducatifs, renforcement membres inférieurs."
+  };
+
+  let grpHTML='';
+  groupDefs.forEach(gd=>{
+    const members=results.filter(r=>r.nG===gd.l);
+    if(!members.length)return;
+    grpHTML+=`<div class="glcard" style="border-top:4px solid ${gd.color}">
+      <div class="glcard-head">
+        <div class="glcard-title">${gd.icon} ${gd.l.toUpperCase()} — ${members.length} athlète(s)</div>
+        <span class="lv ${LV_CLS[gd.l]}">${gd.l}</span>
+      </div>
+      <div class="members-wrap">${members.map(m=>`<span class="member-tag">${m.nom} <span style="color:${m.cP1};font-size:10px">P1:${m.nP1}</span> <span style="color:${m.cP2};font-size:10px">P2:${m.nP2}</span></span>`).join('')}</div>
+      <div class="ex-recs">📋 ${indivRecs[gd.l]||''}</div>
+    </div>`;
+  });
+  document.getElementById('rec-groups').innerHTML=grpHTML;
+}
+
+// ── PROFILE MODAL ──
+function showProfile(idx){
+  const r=results[idx];
+  const mainCol=`linear-gradient(90deg,${r.cP1},${r.cP2})`;
+
+  const noteDelta=r.dv>=1.5?'✅ Très bon gain de vitesse entre les phases (+'+r.dv+' m/s > norme +1,5)':
+    r.dv>=1.0?'✔ Bon gain Phase 1→2 (+'+r.dv+' m/s — dans la norme attendue)':
+    r.dv>=0.5?'⚠ Gain modéré (+'+r.dv+' m/s) — travailler la vitesse maximale':
+    '❌ Gain insuffisant (+'+r.dv+' m/s) — décélération précoce en Phase 2';
+
+  const getRecP1=()=>(RECS.p1[r.nP1]||[]).slice(0,3).map(x=>`<div class="rec-point">${x}</div>`).join('');
+  const getRecP2=()=>(RECS.p2[r.nP2]||[]).slice(0,3).map(x=>`<div class="rec-point">${x}</div>`).join('');
+
+  const freqBlock=(f,nf,cls)=>f?`<div><span style="font-size:11px;color:var(--muted);font-family:var(--font-m)">FRÉQ.</span><div style="font-family:var(--font-d);font-size:18px;font-weight:800;color:${cls==='p1'?'var(--p1)':'var(--p2)'}">${f} <span style="font-size:12px">pas/s</span></div><span class="lv ${LV_CLS[nf]||''}" style="font-size:9px">${nf}</span></div>`:'';
+  const ampliBlock=(a,na,cls)=>a?`<div><span style="font-size:11px;color:var(--muted);font-family:var(--font-m)">AMPLI.</span><div style="font-family:var(--font-d);font-size:18px;font-weight:800;color:${cls==='p1'?'var(--p1)':'var(--p2)'}">${a}m</div><span class="lv ${LV_CLS[na]||''}" style="font-size:9px">${na}</span></div>`:'';
+
+  document.getElementById('mstripe').style.background=mainCol;
+  document.getElementById('mbody').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;margin-top:12px">
+      <div>
+        <div style="font-family:var(--font-d);font-size:26px;font-weight:900;letter-spacing:.05em">${r.nom}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">${r.classe} · ${r.sexe==='M'?'Garçon':'Fille'}${r.taille?' · '+r.taille+' cm':''} · Rang #${r.rang}</div>
+      </div>
+      <span class="lv ${LV_CLS[r.nG]}">${r.nG}</span>
+    </div>
+
+    <div class="mphases">
+      <div class="mphase p1">
+        <div class="mph-label p1">🚀 Phase 1 · 0–25m</div>
+        <div class="mph-time p1">${r.t1}s</div>
+        <div style="font-family:var(--font-d);font-size:20px;color:var(--p1);margin-top:4px">${r.v1} <span style="font-size:14px">m/s</span></div>
+        <span class="lv ${LV_CLS[r.nP1]}" style="font-size:10px;margin-top:6px;display:inline-block">${r.nP1}</span>
+        <div class="mph-metrics">
+          ${freqBlock(r.f1,r.nF1,'p1')}
+          ${ampliBlock(r.a1,r.nA1,'p1')}
+        </div>
+      </div>
+      <div class="mphase p2">
+        <div class="mph-label p2">⚡ Phase 2 · 25–50m</div>
+        <div class="mph-time p2">${r.t2}s</div>
+        <div style="font-family:var(--font-d);font-size:20px;color:var(--p2);margin-top:4px">${r.v2} <span style="font-size:14px">m/s</span></div>
+        <span class="lv ${LV_CLS[r.nP2]}" style="font-size:10px;margin-top:6px;display:inline-block">${r.nP2}</span>
+        <div class="mph-metrics">
+          ${freqBlock(r.f2,r.nF2,'p2')}
+          ${ampliBlock(r.a2,r.nA2,'p2')}
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-family:var(--font-d);font-size:22px;color:var(--sprint)">${r.t50}s</div>
+        <div style="font-size:10px;color:var(--muted);font-family:var(--font-m)">Temps 50m</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-family:var(--font-d);font-size:22px;color:var(--excel)">+${r.dv}</div>
+        <div style="font-size:10px;color:var(--muted);font-family:var(--font-m)">ΔV (m/s)</div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:10px;text-align:center">
+        <div style="font-family:var(--font-d);font-size:22px">${r.dvp}%</div>
+        <div style="font-size:10px;color:var(--muted);font-family:var(--font-m)">Gain %</div>
+      </div>
+    </div>
+
+    <div style="font-size:12px;padding:10px 12px;background:${r.dv>=1.0?'#f0faf4':'#fff8f8'};border-radius:8px;border-left:3px solid ${r.dv>=1.0?'var(--excel)':'var(--sprint)'};margin-bottom:12px">${noteDelta}</div>
+
+    ${(()=>{
+      const diag=genDiagnostic(r);
+      const dc={'Excellent':'#1b7a3e','Bon':'#2e7d32','Moyen':'#f57f17','Passable':'#e65100','Faible':'#c62828','À améliorer':'#c62828'};
+      let probHTML=diag.problemes.map(p=>`<div style="font-size:12.5px;padding:4px 0 4px 14px;position:relative;color:#c62828;border-bottom:1px solid #fee2e2">
+        <span style="position:absolute;left:0;color:#f87171">⚠</span>${p}</div>`).join('');
+      let goodHTML=diag.positifs.map(p=>`<div style="font-size:12.5px;padding:4px 0 4px 14px;position:relative;color:#1b7a3e;border-bottom:1px solid #dcfce7">
+        <span style="position:absolute;left:0">✓</span>${p}</div>`).join('');
+      let prioHTML=diag.priorites.map(p=>`<div style="font-size:12.5px;padding:4px 0 4px 14px;position:relative;color:#c2410c;font-weight:600">
+        <span style="position:absolute;left:0">🎯</span>${p}</div>`).join('');
+      return `<div style="background:var(--bg);border-radius:10px;padding:14px;border-left:4px solid ${dc[r.nG]||'#888'};margin-bottom:12px">
+        <div style="font-family:var(--font-m);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px">📋 Diagnostic automatique</div>
+        <div style="font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--line)">${diag.conclusion}</div>
+        ${probHTML}${goodHTML}
+        ${prioHTML?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--line);font-family:var(--font-m);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Priorité d'entraînement</div>${prioHTML}`:''}
+      </div>`;
+    })()}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="rec-block" style="border-left-color:var(--p1)">
+        <div class="rec-block-title">🚀 Recommandations Phase 1</div>
+        ${getRecP1()}
+      </div>
+      <div class="rec-block" style="border-left-color:var(--p2)">
+        <div class="rec-block-title">⚡ Recommandations Phase 2</div>
+        ${getRecP2()}
+      </div>
+    </div>
+
+    <div class="mcomment-block">
+      <div class="mcomment-label">💬 Commentaire de l'enseignant
+        <span class="mcomment-saved" id="comment-saved">✓ Enregistré</span>
+      </div>
+      <textarea class="mcomment-ta" id="modal-comment-ta" placeholder="Notez vos observations : attitude au départ, crispation, manque d'inclinaison du tronc, bras peu actifs, décélération précoce, progrès observés…">${r.commentaire||''}</textarea>
+      <button class="mcomment-save" onclick="saveComment(${idx})">💾 Enregistrer le commentaire</button>
+    </div>`;
+
+  document.getElementById('moverlay').classList.add('open');
+}
+
+function saveComment(idx){
+  const ta=document.getElementById('modal-comment-ta');
+  if(!ta)return;
+  const val=ta.value.trim();
+  results[idx].commentaire=val;
+  // Also update the source athlete so re-analysis keeps the comment
+  if(athletes[idx])athletes[idx].commentaire=val;
+  // Update the input table textarea if it still exists
+  const rows=document.querySelectorAll('#athlete-rows tr');
+  if(rows[idx]){const t=rows[idx].querySelector('textarea');if(t)t.value=val;}
+  // Show saved confirmation
+  const saved=document.getElementById('comment-saved');
+  if(saved){saved.style.display='inline';setTimeout(()=>saved.style.display='none',2000);}
+  // Refresh results table row without closing modal
+  renderAll();
+}
+
+function closeMBg(e){if(e.target.id==='moverlay')closeM();}
+function closeM(){document.getElementById('moverlay').classList.remove('open');}
+
+// ── EXPORT ──
+function exportCSV(){
+  const hdr=['Rang','Nom','Sexe','Taille','T_P1(s)','V_P1(m/s)','Freq_P1(pas/s)','Ampli_P1(m)','Niv_P1','Freq_P1_Niv','Ampli_P1_Niv','T_P2(s)','V_P2(m/s)','Freq_P2(pas/s)','Ampli_P2(m)','Niv_P2','Freq_P2_Niv','Ampli_P2_Niv','T_50m(s)','DeltaV','Delta%','Niv_Global','Commentaire'];
+  const rows=results.map(r=>[r.rang,`"${r.nom}"`,r.sexe,r.taille||'',r.t1,r.v1,r.f1||'',r.a1||'',`"${r.nP1}"`,`"${r.nF1}"`,`"${r.nA1}"`,r.t2,r.v2,r.f2||'',r.a2||'',`"${r.nP2}"`,`"${r.nF2}"`,`"${r.nA2}"`,r.t50,r.dv,r.dvp,`"${r.nG}"`,`"${(r.commentaire||'').replace(/"/g,"'")}"`]);
+  const csv='\uFEFF'+[hdr,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`Sprint50m_${document.getElementById('classe-name').value||'Groupe'}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();toast('📊 CSV téléchargé');
+}
+
+function copyTable(){
+  const hdr=['Rang','Nom','T P1','V P1','Fréq P1','Ampli P1','Niv P1','T P2','V P2','Fréq P2','Ampli P2','Niv P2','T 50m','ΔV','Global','Commentaire'].join('\t');
+  const rows=results.map(r=>[r.rang,r.nom,r.t1+'s',r.v1+' m/s',r.f1||'—',r.a1||'—',r.nP1,r.t2+'s',r.v2+' m/s',r.f2||'—',r.a2||'—',r.nP2,r.t50+'s','+'+r.dv,r.nG,r.commentaire||''].join('\t'));
+  navigator.clipboard.writeText([hdr,...rows].join('\n')).then(()=>toast('📋 Tableau copié'));
+}
+
+function printResults(){
+  const titre=`${document.getElementById('classe-name').value||'Groupe'} — Sprint 50m`;
+  const date=document.getElementById('test-date').value||new Date().toLocaleDateString('fr-FR');
+  const rows=results.map(r=>`<tr>
+    <td>${r.rang}</td><td style="text-align:left">${r.nom}</td><td>${r.sexe}</td>
+    <td>${r.t1}s</td><td><b>${r.v1}</b></td><td>${r.f1||'—'}</td><td>${r.a1||'—'}</td>
+    <td style="background:${r.cP1};color:#fff;padding:3px 6px">${r.nP1}</td>
+    <td>${r.t2}s</td><td><b>${r.v2}</b></td><td>${r.f2||'—'}</td><td>${r.a2||'—'}</td>
+    <td style="background:${r.cP2};color:#fff;padding:3px 6px">${r.nP2}</td>
+    <td><b>${r.t50}s</b></td><td>+${r.dv}</td>
+    <td style="background:${r.cG};color:#fff;padding:3px 6px">${r.nG}</td>
+    <td style="text-align:left;font-size:10px;color:#444;font-style:${r.commentaire?'normal':'italic'}">${r.commentaire||'—'}</td>
+  </tr>`).join('');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>${titre}</title>
+  <style>body{font-family:'Segoe UI',sans-serif;font-size:11px;margin:16px;color:#0a0a0f}
+  h1{font-size:18px;font-weight:900;margin-bottom:4px}
+  .meta{color:#7a7a90;font-size:11px;margin-bottom:16px}
+  table{border-collapse:collapse;width:100%}th,td{border:1px solid #e4e4ee;padding:5px 7px;text-align:center}
+  th{background:#0a0a0f;color:#fff;font-size:10px}.p1h{background:#e65100!important;color:#fff!important}
+  .p2h{background:#1565c0!important;color:#fff!important}
+  tr:nth-child(even)td{background:#f7f6f3}@media print{@page{size:A4 landscape;margin:10mm}}</style></head>
+  <body><h1>🏃 SPRINT 50M — ${titre.toUpperCase()}</h1>
+  <div class="meta">📅 ${date} · ${results.length} athlètes · Phase 1: 0–25m · Phase 2: 25–50m</div>
+  <table><thead>
+    <tr><th rowspan="2">Rang</th><th rowspan="2">Nom</th><th rowspan="2">Sexe</th>
+    <th colspan="4" class="p1h">Phase 1 · Accélération (0–25m)</th>
+    <th colspan="4" class="p2h">Phase 2 · Vitesse max (25–50m)</th>
+    <th rowspan="2">T 50m</th><th rowspan="2">ΔV</th><th rowspan="2">Niveau Global</th><th rowspan="2" style="text-align:left;min-width:160px">Commentaire</th></tr>
+    <tr><th>T(s)</th><th>V(m/s)</th><th>Fréq</th><th>Ampli</th><th>Niv.</th>
+    <th>T(s)</th><th>V(m/s)</th><th>Fréq</th><th>Ampli</th><th>Niv.</th></tr>
+  </thead><tbody>${rows}</tbody></table>
+  <script>window.onload=()=>window.print()<\/script></body></html>`);
+  w.document.close();
+}
+
+function resetAll(){
+  athletes=[];results=[];rowCount=0;
+  document.getElementById('athlete-rows').innerHTML='';
+  ['hs-total','hs-best','hs-exc'].forEach(id=>document.getElementById(id).textContent='—');
+  goStep(1);addRows(5);
+}
+
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
+
+addRows(5);
+</script>
+</body>
+</html>
